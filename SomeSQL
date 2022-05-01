@@ -1,0 +1,165 @@
+/*UPDATE the favorite table (don't forget to set UpdatedAt to CURRENT_TIMESTAMP!)
+so that every record but two have a favorite song (SongID), genre (GenreID), artist
+(ArtistID), and album (AlbumID).*/
+
+/*Starting from the User table, get the name of every User and that user's favorite
+song, genre, artist, and album. This will involve some JOINs!*/
+
+/*Starting from the albums table, SELECT every album name and its respective ID
+that are longer than 5 minutes (this will involve a JOIN).*/
+
+SELECT * from albums;
+SELECT id from albums;
+SELECT id, name, year_released from albums;
+SELECT * from songs WHERE (id%2 = 0 AND id > 50) OR (id%2 = 1 AND id < 10);
+CREATE TABLE User
+(
+UserID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+FirstName VARCHAR NOT NULL,
+LastName VARCHAR NOT NULL,
+Birthplace VARCHAR NOT NULL,
+CreatedAt DATETIME NOT NULL,
+UpdatedAt DATETIME NULL
+);
+
+CREATE TABLE Favorite
+(
+FavoriteID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+UserID INTEGER NOT NULL,
+ArtistID INTEGER,
+AlbumID INTEGER,
+SongID INTEGER,
+GenreID INTEGER,
+CreatedAt DATETIME NOT NULL,
+UpdatedAt DATETIME NULL,
+FOREIGN KEY (UserID) REFERENCES User (UserID),
+FOREIGN KEY (ArtistID) REFERENCES artists (id),
+FOREIGN KEY (AlbumID) REFERENCES albums (id),
+FOREIGN KEY (SongID) REFERENCES songs (id),
+FOREIGN KEY (GenreID) REFERENCES genres (id)
+);
+
+INSERT INTO User
+(
+FirstName,
+LastName,
+Birthplace,
+CreatedAt
+)
+VALUES
+(
+'Florence',
+'Griffith-Joyner',
+'Florence, Italy',
+CURRENT_TIMESTAMP
+),
+(
+'Tom',
+'BradlyJunior',
+'Venice, Italy',
+CURRENT_TIMESTAMP
+),
+(
+'Jordin',
+'Brady',
+'Fairfield, California',
+CURRENT_TIMESTAMP
+),
+(
+'Missus',
+'Brady',
+'Suisun City, California',
+CURRENT_TIMESTAMP
+),
+(
+'Geraldo',
+'Brady',
+'San Diego, California',
+CURRENT_TIMESTAMP
+),
+(
+'Husky',
+'Brady',
+'Sacramento, California',
+CURRENT_TIMESTAMP
+),
+(
+'Minnesota',
+'Brady',
+'Merced, California',
+CURRENT_TIMESTAMP
+),
+(
+'Jamal',
+'Brady',
+'Raleigh, North Carolina',
+CURRENT_TIMESTAMP
+),
+(
+'Kenya',
+'Brady',
+'Newport News, Virginia',
+CURRENT_TIMESTAMP
+),
+(
+'Alexis',
+'Brady',
+'Vacaville, California',
+CURRENT_TIMESTAMP
+);
+UPDATE User
+SET FirstName = 'Fairly',
+LastName = 'OddParents',
+UpdatedAt = CURRENT_TIMESTAMP
+WHERE FirstName = 'Tom' AND LastName = 'Brady';
+UPDATE User
+SET FirstName = 'Timmy',
+LastName = 'Turner',
+UpdatedAt = CURRENT_TIMESTAMP
+WHERE FirstName = 'Alexis';
+BEGIN TRANSACTION;
+DELETE FROM User;
+SELECT * FROM User;
+ROLLBACK;
+INSERT INTO Favorite
+(
+UserID,
+CreatedAt
+)
+SELECT
+UserID,
+CURRENT_TIMESTAMP
+FROM User;
+BEGIN TRANSACTION;
+DELETE FROM Favorite;
+SELECT * FROM Favorite
+WHERE (FavoriteID%2 = 1 AND FavoriteID > 10) OR (FavoriteID%2 = 0 AND FavoriteID > 10);
+ROLLBACK;
+SELECT * FROM Favorite;
+UPDATE Favorite
+SET SongID = (SELECT id FROM songs WHERE id In (SELECT id FROM songs WHERE id = FavoriteID)),
+ArtistID = (SELECT id FROM artists WHERE id = FavoriteID),
+AlbumID = (SELECT id FROM albums WHERE id = FavoriteID),
+GenreID = (SELECT id FROM genres WHERE id = FavoriteID),
+CreatedAt = CURRENT_TIMESTAMP,
+UpdatedAt = CURRENT_TIMESTAMP
+WHERE FavoriteID > 2;
+SELECT * From Favorite;
+SELECT * from songs;
+SELECT * FROM albums;
+SELECT * FROM genres;
+SELECT * FROM artists;
+SELECT FirstName, LastName, s.name AS song, a2.name AS artist, a1.name AS album, g.name AS genre
+FROM User AS u
+INNER JOIN songs AS s
+ON UserID = s.id
+INNER JOIN albums AS a1
+On s.album_id = a1.id
+INNER JOIN genres As g
+On a1.genre_id = g.id
+INNER JOIN artists AS a2
+ON a1.artist_id = a2.id;
+SELECT s.name, s.id FROM albums AS a
+INNER JOIN songs AS s
+ON album_id = a.id
+WHERE length > '5:00';
